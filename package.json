@@ -18,11 +18,11 @@
     "smoke": "scripts/smoke.sh"
   },
   "devDependencies": {
-    "@eslint/js": "^9.17.0",
-    "eslint": "^9.17.0",
-    "globals": "^14.0.0",
-    "typescript": "~5.7.2",
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.12.0",
+    "globals": "^17.13.0",
+    "typescript": "~7.0.2",
     "typescript-eslint": "^8.18.0",
-    "vitest": "^2.1.8"
+    "vitest": "^5.0.3"
   }
 }
