@@ -31,15 +31,17 @@ export interface Api {
   on(event: "session_start", handler: (event: unknown, ctx: Ctx) => void): unknown;
 }
 
+const DIALOGS = ["select", "confirm", "input", "editor"] as const;
 /** Value each dialog resolves to when cancelled, matching pi's rpc defaults. */
-const CANCELLED: Record<"select" | "confirm" | "input" | "editor", unknown> = {
+const CANCELLED: Record<(typeof DIALOGS)[number], unknown> = {
   select: undefined,
   confirm: false,
   input: undefined,
   editor: undefined,
 };
 
-const GUARDED = Symbol.for("porcupine.startupDialogs");
+/** pi rebuilds the UI context on each session rebind; wrap each one once. */
+const guarded = new WeakSet<Ui>();
 
 /** True once pi's rpc line reader has put stdin into flowing mode. */
 export function stdinReady(stdin: { readableFlowing: boolean | null } = process.stdin): boolean {
@@ -47,10 +49,9 @@ export function stdinReady(stdin: { readableFlowing: boolean | null } = process.
 }
 
 export function guardUi(ui: Ui, ready: () => boolean = () => stdinReady()): void {
-  const marked = ui as Ui & { [GUARDED]?: true };
-  if (marked[GUARDED]) return;
-  marked[GUARDED] = true;
-  for (const method of Object.keys(CANCELLED) as (keyof typeof CANCELLED)[]) {
+  if (guarded.has(ui)) return;
+  guarded.add(ui);
+  for (const method of DIALOGS) {
     const original = ui[method];
     if (typeof original !== "function") continue;
     ui[method] = (...args: unknown[]) => {
