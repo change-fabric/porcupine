@@ -6,8 +6,7 @@ import { routeProvider, vendorOfId } from "./routing.js";
 /** Default model on OpenRouter, and the same model on the Anthropic API when keyed. */
 export const DEFAULT_PROVIDER = "openrouter";
 /** OpenRouter default while no Anthropic key is set. */
-export const DEFAULT_MODEL = "deepseek/deepseek-v4-pro";
-export const DIRECT_ANTHROPIC_MODEL = "claude-opus-5-5";
+export const DEFAULT_MODEL = "x-ai/grok-4.7";
 export const DEFAULT_THINKING = "low";
 
 const OPENROUTER_KEY_PREFIX = "sk-or-";
@@ -57,16 +56,17 @@ function hasFlag(args: string[], flag: string): boolean {
  * Default model from the child env. PORCUPINE_MODEL is an OpenRouter-style "vendor/model" id,
  * routed like any other; a directly served vendor gets the id without its prefix.
  */
-export function resolveDefaults(env: NodeJS.ProcessEnv): PiDefaults {
-  if (env.PORCUPINE_MODEL) {
-    const vendor = vendorOfId(env.PORCUPINE_MODEL);
+/** PORCUPINE_MODEL comes from the process env, else the env file; buildChildEnv does not carry it. */
+export function resolveDefaults(env: NodeJS.ProcessEnv, fileEnv: Record<string, string> = {}): PiDefaults {
+  const modelId = env.PORCUPINE_MODEL || fileEnv.PORCUPINE_MODEL;
+  if (modelId) {
+    const vendor = vendorOfId(modelId);
     const provider = routeProvider(vendor, env);
     if (provider) {
-      const model = provider === "openrouter" ? env.PORCUPINE_MODEL : env.PORCUPINE_MODEL.slice(vendor.length + 1);
+      const model = provider === "openrouter" ? modelId : modelId.slice(vendor.length + 1);
       return { provider, model };
     }
   }
-  if (routeProvider("anthropic", env) === "anthropic") return { provider: "anthropic", model: DIRECT_ANTHROPIC_MODEL };
   return { provider: DEFAULT_PROVIDER, model: DEFAULT_MODEL };
 }
 

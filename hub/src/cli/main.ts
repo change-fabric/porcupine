@@ -39,12 +39,13 @@ async function main(): Promise<void> {
   }
   const cwd = process.cwd();
   const envFile = defaultEnvFile(process.env);
-  const childEnv = buildChildEnv(process.env, loadEnvFile(envFile));
+  const fileEnv = loadEnvFile(envFile);
+  const childEnv = buildChildEnv(process.env, fileEnv);
   const session = await startSession({
     name: resolveName({ explicit: args.name, env: process.env, cwd }),
     cwd,
     piBin: process.env.PORCUPINE_PI_BIN ?? "pi",
-    piArgs: buildPiArgs(args.piArgs, [STARTUP_DIALOGS_EXTENSION, ASK_EXTENSION, AUTOCOMPACT_EXTENSION, HOOKS_EXTENSION, SKILLS_EXTENSION, LOOP_EXTENSION, SUBAGENT_EXTENSION, PLAN_MODE_EXTENSION, TODO_EXTENSION], resolveDefaults(childEnv)),
+    piArgs: buildPiArgs(args.piArgs, [STARTUP_DIALOGS_EXTENSION, ASK_EXTENSION, AUTOCOMPACT_EXTENSION, HOOKS_EXTENSION, SKILLS_EXTENSION, LOOP_EXTENSION, SUBAGENT_EXTENSION, PLAN_MODE_EXTENSION, TODO_EXTENSION], resolveDefaults(childEnv, fileEnv)),
     childEnv,
     runtimeDir: resolveRuntimeDir({ env: process.env }),
     log,
