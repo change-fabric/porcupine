@@ -100,7 +100,7 @@ describe("porcupine session", () => {
     const envFile = join(tmpdir(), `fake-env-${process.pid}.json`);
     await start({ FAKE_PI_ARGS_FILE: argsFile, FAKE_PI_ENV_FILE: envFile, PORCUPINE_RPC_PASSWORD: "hunter2" });
     const args = JSON.parse(readFileSync(argsFile, "utf8"));
-    expect(args).toEqual(["--mode", "rpc", "--provider", "openrouter", "--model", "deepseek/deepseek-v4-pro", "--thinking", "low"]);
+    expect(args).toEqual(["--mode", "rpc", "--provider", "openrouter", "--model", "x-ai/grok-4.7", "--thinking", "low"]);
     const env = JSON.parse(readFileSync(envFile, "utf8")) as Record<string, string>;
     expect(env.OPENROUTER_API_KEY).toBe("sk-or-test");
     expect(env.AI_GATEWAY_API_KEY).toBeUndefined();

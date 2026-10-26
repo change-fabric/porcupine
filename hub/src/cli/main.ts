@@ -7,6 +7,7 @@ import { limitsFromEnv } from "./event-log.js";
 import { createLogger } from "./log.js";
 import { readPinnedPiVersion, startSession } from "./session.js";
 
+const STARTUP_DIALOGS_EXTENSION = fileURLToPath(new URL("../extension/startup-dialogs.js", import.meta.url));
 const ASK_EXTENSION = fileURLToPath(new URL("../extension/ask-user-question.js", import.meta.url));
 const AUTOCOMPACT_EXTENSION = fileURLToPath(new URL("../extension/autocompact/index.js", import.meta.url));
 const HOOKS_EXTENSION = fileURLToPath(new URL("../extension/claude-hooks/index.js", import.meta.url));
@@ -38,12 +39,13 @@ async function main(): Promise<void> {
   }
   const cwd = process.cwd();
   const envFile = defaultEnvFile(process.env);
-  const childEnv = buildChildEnv(process.env, loadEnvFile(envFile));
+  const fileEnv = loadEnvFile(envFile);
+  const childEnv = buildChildEnv(process.env, fileEnv);
   const session = await startSession({
     name: resolveName({ explicit: args.name, env: process.env, cwd }),
     cwd,
     piBin: process.env.PORCUPINE_PI_BIN ?? "pi",
-    piArgs: buildPiArgs(args.piArgs, [ASK_EXTENSION, AUTOCOMPACT_EXTENSION, HOOKS_EXTENSION, SKILLS_EXTENSION, LOOP_EXTENSION, SUBAGENT_EXTENSION, PLAN_MODE_EXTENSION, TODO_EXTENSION], resolveDefaults(childEnv)),
+    piArgs: buildPiArgs(args.piArgs, [STARTUP_DIALOGS_EXTENSION, ASK_EXTENSION, AUTOCOMPACT_EXTENSION, HOOKS_EXTENSION, SKILLS_EXTENSION, LOOP_EXTENSION, SUBAGENT_EXTENSION, PLAN_MODE_EXTENSION, TODO_EXTENSION], resolveDefaults(childEnv, fileEnv)),
     childEnv,
     runtimeDir: resolveRuntimeDir({ env: process.env }),
     log,

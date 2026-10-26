@@ -110,6 +110,14 @@ describe("OpenRouter key shim", () => {
 });
 
 describe("resolveDefaults", () => {
+  it("reads PORCUPINE_MODEL from the env file, the process env winning", () => {
+    const env = { ANTHROPIC_API_KEY: "sk-ant-test" };
+    expect(resolveDefaults(env, { PORCUPINE_MODEL: "x-ai/grok-4.7" })).toEqual({ provider: "openrouter", model: "x-ai/grok-4.7" });
+    expect(resolveDefaults({ ...env, PORCUPINE_MODEL: "x-ai/grok-4.3" }, { PORCUPINE_MODEL: "x-ai/grok-4.7" })).toEqual({
+      provider: "openrouter",
+      model: "x-ai/grok-4.3",
+    });
+  });
   it("uses OpenRouter without an Anthropic key", () => {
     expect(resolveDefaults({ OPENROUTER_API_KEY: "sk-or-test", AI_GATEWAY_API_KEY: "vk" })).toEqual({
       provider: "openrouter",
@@ -117,8 +125,8 @@ describe("resolveDefaults", () => {
     });
     expect(resolveDefaults({})).toEqual({ provider: DEFAULT_PROVIDER, model: DEFAULT_MODEL });
   });
-  it("uses the Anthropic API when its key is set", () => {
-    expect(resolveDefaults({ ANTHROPIC_API_KEY: "ak" })).toEqual({ provider: "anthropic", model: "claude-opus-5-5" });
+  it("keeps the OpenRouter default when an Anthropic key is set", () => {
+    expect(resolveDefaults({ ANTHROPIC_API_KEY: "ak" })).toEqual({ provider: "openrouter", model: "x-ai/grok-4.7" });
   });
   it("routes a PORCUPINE_MODEL override", () => {
     expect(resolveDefaults({ PORCUPINE_MODEL: "x/y" })).toEqual({ provider: "openrouter", model: "x/y" });
