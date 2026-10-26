@@ -3,9 +3,18 @@ updates:
   - package-ecosystem: npm
     directory: /
     schedule: { interval: weekly }
+    # Majors come as one PR per package so each can be fixed on its own.
     groups:
       dev:
         dependency-type: development
+        update-types: [minor, patch]
+    ignore:
+      # typescript-eslint 8.x has no TypeScript 7 support yet.
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
+      # Tracks the Node 22 runtime, not the latest Node.
+      - dependency-name: "@types/node"
+        update-types: [version-update:semver-major]
   - package-ecosystem: github-actions
     directory: /
     schedule: { interval: weekly }
